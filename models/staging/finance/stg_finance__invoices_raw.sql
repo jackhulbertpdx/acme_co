@@ -19,7 +19,6 @@ renamed as (
         sales_rep,
         product_category,
         currency
-
     from source
 
 )
