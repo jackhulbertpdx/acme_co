@@ -2,7 +2,7 @@ with
 
 source as (
 
-    select * from {{ source('finance', 'chart_of_accounts_raw') }}
+    select * from {{ source('quickbooks', 'chart_of_accounts_raw') }}
 
 ),
 
