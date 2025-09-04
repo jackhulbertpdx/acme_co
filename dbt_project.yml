@@ -1,0 +1,37 @@
+name: 'my_new_project'
+version: '1.0.0'
+config-version: 2
+
+profile: 'default'  # Ensure 'default' matches your profile in profiles.yml
+
+# Paths for different file types
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Target and clean settings
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Model configurations (materializations, schemas based on target)
+models:
+  my_new_project:  # Replace 'my_new_project' with your project name if different
+    staging:
+      +materialized: table
+      +schema: "{{ target.name == 'dev' and 'dev_staging' or 'prod_staging' }}"
+    int:
+      +materialized: ephemeral
+      +schema: "{{ target.name == 'dev' and 'dev_int' or 'prod_int' }}"
+    edw:
+      +materialized: table
+      +schema: "{{ target.name == 'dev' and 'dev_edw' or 'prod_edw' }}"
+
+vars:
+  # Enable dbt_utils package
+  dbt_utils_dispatch_list: [dbt_utils]
+

@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: finance
+    database: dev_raw
+    schema: raw
+    tables:
+      - name: customers_raw
+        description: "Raw customer data"
+      - name: budgets_raw
+        description: "Raw budgets data"
+      - name: chart_of_accounts_raw
+        description: "Raw chart of accounts data"
+      - name: general_ledger_raw
+        description: "Raw general ledger data"
+      - name: invoices_raw
+        description: "Raw invoices data"

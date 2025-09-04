@@ -1,0 +1,190 @@
+version: 2
+
+# Staging Models
+models:
+  - name: stg_finance__chart_of_accounts_raw
+    description: "This model represents the raw chart of accounts data sourced from the raw_finance schema."
+    columns:
+      - name: account_id
+        description: "The unique identifier for the account."
+        tests:
+          - not_null
+          - unique
+      - name: account_name
+        description: "The name of the account."
+        tests:
+          - not_null
+      - name: account_type
+        description: "The type of account (e.g., asset, liability, revenue, etc.)."
+      - name: account_subtype
+        description: "The subtype of the account."
+      - name: dbt_loaded_at
+        description: "The timestamp when the record was loaded into DBT."
+
+  - name: stg_finance__general_ledger_raw
+    description: "This model contains transaction-level data from the general ledger."
+    columns:
+      - name: entry_id
+        description: "The unique identifier for each transaction entry."
+        tests:
+          - not_null
+          - unique
+      - name: transaction_date
+        description: "The date of the transaction."
+        tests:
+          - not_null
+      - name: account_id
+        description: "The account associated with the transaction."
+      - name: debit_credit
+        description: "Indicates if the transaction was a debit or credit."
+      - name: amount
+        description: "The amount of the transaction."
+        tests:
+          - not_null
+      - name: reference_number
+        description: "The reference number for the transaction."
+      - name: dbt_loaded_at
+        description: "The timestamp when the record was loaded into DBT."
+
+  - name: stg_finance__customers_raw
+    description: "This model contains customer data sourced from the CRM system."
+    columns:
+      - name: customer_id
+        description: "The unique identifier for the customer."
+        tests:
+          - not_null
+          - unique
+      - name: customer_name
+        description: "The name of the customer."
+      - name: region
+        description: "The geographical region of the customer."
+      - name: credit_limit
+        description: "The credit limit for the customer."
+      - name: created_date
+        description: "The date when the customer record was created."
+      - name: dbt_loaded_at
+        description: "The timestamp when the record was loaded into DBT."
+
+  - name: stg_finance__invoices_raw
+    description: "This model contains data on invoices, including their payment status and amounts."
+    columns:
+      - name: invoice_id
+        description: "The unique identifier for the invoice."
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "The customer associated with the invoice."
+      - name: invoice_date
+        description: "The date the invoice was issued."
+      - name: invoice_amount
+        description: "The total amount of the invoice."
+        tests:
+          - not_null
+      - name: payment_status
+        description: "The status of the invoice payment (e.g., Paid, Pending)."
+      - name: dbt_loaded_at
+        description: "The timestamp when the record was loaded into DBT."
+
+  - name: stg_finance__budgets_raw
+    description: "This model contains the budget data, including planned budgets for departments and cost centers."
+    columns:
+      - name: budget_id
+        description: "The unique identifier for the budget."
+        tests:
+          - not_null
+          - unique
+      - name: budget_year
+        description: "The year for which the budget is planned."
+      - name: budget_month
+        description: "The month for which the budget is planned."
+      - name: budget_amount
+        description: "The budgeted amount for the account in the given period."
+        tests:
+          - not_null
+      - name: dbt_loaded_at
+        description: "The timestamp when the record was loaded into DBT."
+
+# Intermediate Models
+  - name: int_monthly_gl_summary
+    description: "This model summarizes the general ledger data at the monthly level."
+    columns:
+      - name: month_year
+        description: "The month and year for the summary (truncated from the transaction date)."
+        tests:
+          - not_null
+      - name: total_debits
+        description: "The total debits for the month."
+      - name: total_credits
+        description: "The total credits for the month."
+      - name: net_amount
+        description: "The net amount (total debits - total credits) for the month."
+      - name: transaction_count
+        description: "The number of transactions recorded for the month."
+
+  - name: int_customer_aging
+    description: "This model provides a summary of customer invoices aged by their payment status."
+    columns:
+      - name: customer_id
+        description: "The unique identifier for the customer."
+        tests:
+          - not_null
+      - name: current_amount
+        description: "The outstanding amount that is current (not past due)."
+      - name: days_1_30
+        description: "The outstanding amount that is between 1 and 30 days past due."
+      - name: days_31_60
+        description: "The outstanding amount that is between 31 and 60 days past due."
+      - name: total_outstanding
+        description: "The total outstanding amount across all aging buckets."
+
+# Mart Models
+  - name: income_statement
+    description: "This model generates the monthly income statement, including revenue, cost of goods sold, gross profit, operating expenses, and net income."
+    columns:
+      - name: month_year
+        description: "The month and year for the income statement."
+        tests:
+          - not_null
+      - name: revenue
+        description: "The total revenue for the month."
+      - name: cost_of_goods_sold
+        description: "The total cost of goods sold for the month."
+      - name: net_income
+        description: "The total net income for the month."
+
+  - name: balance_sheet
+    description: "This model generates the monthly balance sheet, including total assets, liabilities, and equity."
+    columns:
+      - name: month_year
+        description: "The month and year for the balance sheet."
+        tests:
+          - not_null
+      - name: total_assets
+        description: "The total assets value for the month."
+      - name: total_liabilities
+        description: "The total liabilities value for the month."
+      - name: total_equity
+        description: "The total equity value for the month."
+
+  - name: budget_vs_actual
+    description: "This model compares the budgeted amounts to the actual amounts from the general ledger."
+    columns:
+      - name: budget_year
+        description: "The budget year."
+        tests:
+          - not_null
+      - name: variance
+        description: "The variance between the budgeted and actual amounts."
+      - name: variance_percentage
+        description: "The percentage difference between budgeted and actual amounts."
+
+  - name: ar_aging_report
+    description: "This model provides an accounts receivable aging report to assess the outstanding balances by customer."
+    columns:
+      - name: customer_id
+        description: "The unique identifier for the customer."
+      - name: high_risk_percentage
+        description: "The percentage of outstanding balance that is over 90 days due."
+      - name: risk_category
+        description: "Categorization of risk based on outstanding balances."
