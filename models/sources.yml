@@ -1,7 +1,7 @@
 version: 2
 
 sources:
-  - name: finance
+  - name: quickbooks
     database: dev_raw
     schema: raw
     tables:
