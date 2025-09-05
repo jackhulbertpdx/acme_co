@@ -152,6 +152,11 @@ models:
         description: "The total cost of goods sold for the month."
       - name: net_income
         description: "The total net income for the month."
+        tests:
+        - name: test_gross_profit
+          description: "Ensures gross profit is correctly calculated"
+          severity: error
+
 
   - name: balance_sheet
     description: "This model generates the monthly balance sheet, including total assets, liabilities, and equity."
